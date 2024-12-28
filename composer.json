@@ -1,0 +1,22 @@
+{
+    "name": "wtsergo/amp-data-pipeline",
+    "description": "Async data pipeline using amphp",
+    "require": {
+        "php": "^8.1",
+        "amphp/amp": "3.x@dev",
+        "amphp/pipeline": "1.x@dev"
+    },
+    "minimum-stability": "dev",
+    "version": "1.0.0",
+    "license": [
+        "MIT"
+    ],
+    "autoload": {
+        "files": [
+            "src/functions.php"
+        ],
+        "psr-4": {
+            "Wtsergo\\AmpDataPipeline\\": "src/"
+        }
+    }
+}
