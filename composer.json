@@ -3,11 +3,9 @@
     "description": "Async data pipeline using amphp",
     "require": {
         "php": "^8.1",
-        "amphp/amp": "3.x@dev",
-        "amphp/pipeline": "1.x@dev"
+        "amphp/amp": "^3.0.2",
+        "amphp/pipeline": "^1.2.1"
     },
-    "minimum-stability": "dev",
-    "version": "1.0.0",
     "license": [
         "MIT"
     ],
