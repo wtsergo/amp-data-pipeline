@@ -57,9 +57,11 @@ trait ProcessorHelper
                 if (!$queue->isComplete()) {
                     $queue->complete();
                 }
-            } catch (\Throwable $e) {
-                $queue->error($e);
-                throw $e;
+            } catch (\Throwable $exception) {
+                // uncomment if getting Amp\Pipeline\DisposedException
+                //die("$exception");
+                $queue->error($exception);
+                throw $exception;
             }
         });
     }

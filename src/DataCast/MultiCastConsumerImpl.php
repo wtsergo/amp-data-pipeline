@@ -72,6 +72,8 @@ class MultiCastConsumerImpl implements MultiCastConsumer
             $source = new IteratorSource($this->queue->iterate());
             $this->processor->cast($source, $this->acceptCastItem(...));
         } catch (\Throwable $exception) {
+            // uncomment if getting Amp\Pipeline\DisposedException
+            //die("$exception");
             errorDisposeQueue($this->queue, $exception);
             throw $exception;
         }
