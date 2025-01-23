@@ -15,7 +15,7 @@ class DataItemImpl implements DataItem
         return new static(data: $data, meta: $meta);
     }
 
-    public function getData($key=null)
+    public function getData($key=null): mixed
     {
         return $key ? $this->data[$key]??null : $this->data;
     }
@@ -26,7 +26,7 @@ class DataItemImpl implements DataItem
         return $this;
     }
 
-    public function getMeta($key = null)
+    public function getMeta($key = null): mixed
     {
         return $key ? $this->meta[$key]??null : $this->meta;
     }

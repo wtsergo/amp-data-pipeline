@@ -2,6 +2,7 @@
 
 namespace Wtsergo\AmpDataPipeline\DataSource;
 
+use Amp\Pipeline\ConcurrentIterator;
 use Amp\Pipeline\Queue;
 use Wtsergo\AmpDataPipeline\Helper\ProcessorHelper;
 use function Amp\async;
@@ -26,7 +27,7 @@ class ArraySource implements \IteratorAggregate
         $this->queue->complete();
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator(): ConcurrentIterator
     {
         if (null === $this->queue) {
             $this->queue = $queue = new Queue();

@@ -2,6 +2,7 @@
 
 namespace Wtsergo\AmpDataPipeline\DataSource;
 
+use Amp\Pipeline\ConcurrentIterator;
 use Amp\Pipeline\Queue;
 
 class QueueSource implements \IteratorAggregate
@@ -12,7 +13,7 @@ class QueueSource implements \IteratorAggregate
     {
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator(): ConcurrentIterator
     {
         return $this->queue->iterate();
     }

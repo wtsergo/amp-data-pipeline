@@ -2,16 +2,19 @@
 
 namespace Wtsergo\AmpDataPipeline\DataSource;
 
+use Amp\Pipeline\ConcurrentIterator;
+use Amp\Pipeline\Internal\ConcurrentIterableIterator;
+
 class IteratorSource implements \IteratorAggregate
 {
     public function __construct(
-        private readonly \Traversable $iterator,
+        private readonly iterable $iterator,
     )
     {
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator(): ConcurrentIterator
     {
-        return $this->iterator;
+        return new ConcurrentIterableIterator($this->iterator);
     }
 }
