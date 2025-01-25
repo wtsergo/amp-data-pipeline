@@ -2,6 +2,7 @@
 
 namespace Wtsergo\AmpDataPipeline;
 
+use Amp\Pipeline\ConcurrentIterator;
 use Wtsergo\AmpDataPipeline\DataItem\DataItem;
 use Wtsergo\AmpDataPipeline\Helper\ProcessorAssertion;
 use Wtsergo\AmpDataPipeline\Helper\ProcessorHelper;
@@ -11,7 +12,7 @@ class ProcessorComposition extends ProcessorAbstract
     use ProcessorAssertion;
     use ProcessorHelper;
 
-    protected ?\IteratorAggregate $lastSource = null;
+    protected ?DataSource $lastSource = null;
 
     /**
      * @param list<Processor> $processors
@@ -34,11 +35,10 @@ class ProcessorComposition extends ProcessorAbstract
     {
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator(): ConcurrentIterator
     {
-        $this->assertSource($this->source);
         if ($this->lastSource === null) {
-            $this->lastSource = $this->source;
+            $this->lastSource = $this->getSource();
             foreach ($this->processors as $processor) {
                 $processor->setSource($this->lastSource);
                 $this->lastSource = $processor;

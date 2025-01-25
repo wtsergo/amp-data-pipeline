@@ -2,15 +2,16 @@
 
 namespace Wtsergo\AmpDataPipeline;
 
+use Amp\Pipeline\ConcurrentIterator;
 use Wtsergo\AmpDataPipeline\DataItem\DataItem;
 
-interface Processor extends \IteratorAggregate
+interface Processor extends DataSource
 {
     /**
-     * @param \IteratorAggregate $source
+     * @param DataSource $source
      * @return self
      */
-    public function setSource(\IteratorAggregate $source): self;
+    public function setSource(DataSource $source): self;
 
     /**
      * @param int $concurrency
@@ -25,9 +26,9 @@ interface Processor extends \IteratorAggregate
     public function setBufferSize(int $bufferSize): self;
 
     /**
-     * @return \Traversable<int, DataItem>
+     * @return ConcurrentIterator<DataItem>
      */
-    public function getIterator(): \Traversable;
+    public function getIterator(): ConcurrentIterator;
 
     public function reset(): self;
 

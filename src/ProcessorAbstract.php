@@ -3,6 +3,7 @@
 namespace Wtsergo\AmpDataPipeline;
 
 use Amp\Pipeline\ConcurrentIterator;
+use Amp\Pipeline\Internal\ConcurrentQueueIterator;
 use Amp\Pipeline\Queue;
 use Wtsergo\AmpDataPipeline\DataItem\DataItem;
 use Wtsergo\AmpDataPipeline\Helper\ProcessorAssertion;
@@ -17,14 +18,27 @@ abstract class ProcessorAbstract implements Processor
     protected int $bufferSize = 0;
     protected int $concurrency = 1;
 
-    protected ?\IteratorAggregate $source = null;
+    protected ?DataSource $source = null;
 
+    /**
+     * @var Queue<DataItem>|null
+     */
     protected ?Queue $queue = null;
 
-    public function setSource(\IteratorAggregate $source): self
+    /**
+     * @var ConcurrentQueueIterator<DataItem>|null
+     */
+    private ?ConcurrentQueueIterator $iterator;
+
+    public function setSource(DataSource $source): self
     {
         $this->source = $source;
         return $this;
+    }
+
+    public function getSource(): DataSource
+    {
+        return $this->source ?? throw new \RuntimeException('Undefined processor source');
     }
 
     public function setConcurrency(int $concurrency): self
@@ -39,6 +53,10 @@ abstract class ProcessorAbstract implements Processor
         return $this;
     }
 
+    /**
+     * @param ConcurrentIterator<DataItem> $iterator
+     * @return void
+     */
     protected function read(ConcurrentIterator $iterator)
     {
         foreach ($iterator as $value) {
@@ -57,29 +75,29 @@ abstract class ProcessorAbstract implements Processor
         $this->queue->push($value);
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator(): ConcurrentIterator
     {
-        $this->assertSource($this->source);
-        if (null === $this->queue) {
+        if (!isset($this->queue)) {
             $bufferSize = $this->bufferSize;
             if ($bufferSize === 0) {
                 $bufferSize = max($this->concurrency, $this->bufferSize);
             }
             $this->queue = $queue = new Queue($bufferSize);
+            $this->iterator = $this->queue->iterate();
             $futures = [];
             for ($i=0; $i<$this->concurrency; $i++) {
-                $this->assertSourceIterator($iterator = $this->source->getIterator());
-                $futures[] = async($this->read(...), $iterator);
+                $futures[] = async($this->read(...), $this->getSource()->getIterator());
             }
             $this->trackQueueFutures($queue, $futures);
         }
-        return $this->queue->iterate();
+        return $this->iterator;
     }
 
     public function reset(): self
     {
         $this->assertQueueComplete($this->queue);
         $this->queue = null;
+        $this->iterator = null;
         return $this;
     }
 

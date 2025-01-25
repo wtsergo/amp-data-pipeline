@@ -27,7 +27,7 @@ namespace Wtsergo\AmpDataPipeline {
         ) {
         }
 
-        public function cast(\IteratorAggregate $source, \Closure $acceptCastItem): void
+        public function cast(DataSource $source, \Closure $acceptCastItem): void
         {
             $this->assertSourceIterator($iterator = $source->getIterator());
             $result = DataItemImpl::fromArray([]);

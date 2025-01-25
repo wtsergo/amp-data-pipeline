@@ -3,37 +3,24 @@
 namespace Wtsergo\AmpDataPipeline\DataSource;
 
 use Amp\Pipeline\ConcurrentIterator;
-use Amp\Pipeline\Queue;
-use Wtsergo\AmpDataPipeline\Helper\ProcessorHelper;
-use function Amp\async;
+use Amp\Pipeline\Internal\ConcurrentArrayIterator;
+use Wtsergo\AmpDataPipeline\DataItem\DataItem;
+use Wtsergo\AmpDataPipeline\DataSource;
 
-class ArraySource implements \IteratorAggregate
+class ArraySource implements DataSource
 {
-    use ProcessorHelper;
+    /**
+     * @var ConcurrentArrayIterator<DataItem>
+     */
+    private ConcurrentArrayIterator $iterator;
 
-    protected ?Queue $queue = null;
-
-    public function __construct(
-        private readonly array $values
-    )
+    public function __construct(array $values)
     {
-    }
-
-    private function read()
-    {
-        foreach ($this->values as $value) {
-            $this->queue->push($value);
-        }
-        $this->queue->complete();
+        $this->iterator = new ConcurrentArrayIterator($values);
     }
 
     public function getIterator(): ConcurrentIterator
     {
-        if (null === $this->queue) {
-            $this->queue = $queue = new Queue();
-            $future = async($this->read(...));
-            $this->trackQueueFutures($queue, [$future]);
-        }
-        return $this->queue->iterate();
+        return $this->iterator;
     }
 }

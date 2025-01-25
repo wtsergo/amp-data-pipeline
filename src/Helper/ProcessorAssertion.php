@@ -26,12 +26,6 @@ trait ProcessorAssertion
             }
         }
     }
-    protected function assertSource($source): void
-    {
-        if ($source === null) {
-            throw new \RuntimeException('Undefined processor source');
-        }
-    }
 
     protected function assertSourceIterator($iterator): void
     {

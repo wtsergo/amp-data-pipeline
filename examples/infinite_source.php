@@ -6,14 +6,16 @@ namespace {
 
 namespace Wtsergo\AmpDataPipeline {
 
+    use Amp\Pipeline\ConcurrentIterator;
     use Amp\Pipeline\Queue;
     use Revolt\EventLoop;
     use Wtsergo\AmpDataPipeline\DataItem\DataItem;
     use Wtsergo\AmpDataPipeline\DataItem\DataItemImpl;
 
-    class InfiniteSource implements \IteratorAggregate
+    class InfiniteSource implements DataSource
     {
         protected ?Queue $queue = null;
+        protected ?ConcurrentIterator $iterator = null;
         public function __construct(
         )
         {
@@ -28,13 +30,14 @@ namespace Wtsergo\AmpDataPipeline {
             $this->queue->complete();
         }
 
-        public function getIterator(): \Traversable
+        public function getIterator(): ConcurrentIterator
         {
             if (null === $this->queue) {
                 $this->queue = new Queue();
+                $this->iterator = $this->queue->iterate();
                 EventLoop::queue($this->read(...));
             }
-            return $this->queue->iterate();
+            return $this->iterator;
         }
     }
 
