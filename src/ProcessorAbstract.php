@@ -57,7 +57,7 @@ abstract class ProcessorAbstract implements Processor
      * @param ConcurrentIterator<DataItem> $iterator
      * @return void
      */
-    protected function read(ConcurrentIterator $iterator)
+    protected function read(ConcurrentIterator $iterator): void
     {
         foreach ($iterator as $value) {
             $this->processDataItem($value);

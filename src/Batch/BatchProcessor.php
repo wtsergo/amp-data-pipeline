@@ -83,7 +83,7 @@ class BatchProcessor extends ProcessorAbstract
         }
     }
 
-    protected function read(ConcurrentIterator $iterator)
+    protected function read(ConcurrentIterator $iterator): void
     {
         $count = 0;
         $this->assertProcessor($processor = ($this->batchProcessorFactory)());

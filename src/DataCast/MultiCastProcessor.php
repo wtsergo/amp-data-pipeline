@@ -49,7 +49,7 @@ class MultiCastProcessor extends ProcessorAbstract
         );
     }
 
-    protected function read(ConcurrentIterator $iterator)
+    protected function read(ConcurrentIterator $iterator): void
     {
         $castProcessors = [];
         /** @var \SplObjectStorage<CastProcessor, Queue> $castQueues */
