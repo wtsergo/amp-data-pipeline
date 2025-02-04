@@ -10,7 +10,7 @@ class DataItemImpl implements DataItem
     ) {
     }
 
-    public static function fromArray(array $data, array $meta = []): self
+    public static function fromArray(array $data, array $meta = []): static
     {
         return new static(data: $data, meta: $meta);
     }
