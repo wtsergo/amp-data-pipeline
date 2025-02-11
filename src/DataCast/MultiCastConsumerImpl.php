@@ -40,7 +40,29 @@ class MultiCastConsumerImpl implements MultiCastConsumer
                 $releaseCastItem($castItem);
             }
         };
-        $this->processCastItems = $this->processCastItems(...);
+        $this->processCastItems = static function (
+            CastProcessor $castProcessor, DataItem $origItem, ConcurrentIterator $castItems
+        ) use ($castResults, $castProcessors, $waitingQueue, $releaseCastItem): void {
+            $result = [];
+            foreach ($castItems as $castItem) {
+                $result[] = $castItem;
+            }
+            /** @var \SplObjectStorage $__castResults */
+            $__castResults = $castResults[$origItem];
+            $__castResults[$castProcessor] = $result;
+            if ($__castResults->count() === count($castProcessors)) {
+                $result = [];
+                foreach ($__castResults as $__castProc) {
+                    $result = array_merge($result, $__castResults[$__castProc]);
+                }
+                $castResults->detach($origItem);
+                $releaseCastItem(DataItemImpl::fromArray($result));
+                if (!$waitingQueue->isEmpty()) {
+                    $suspension = $waitingQueue->dequeue();
+                    $suspension->resume();
+                }
+            }
+        };
     }
 
     public static function selfCreate(
@@ -110,27 +132,4 @@ class MultiCastConsumerImpl implements MultiCastConsumer
         }
     }
 
-    protected function processCastItems(
-        CastProcessor $castProcessor, DataItem $origItem, ConcurrentIterator $castItems
-    ): void {
-        $result = [];
-        foreach ($castItems as $castItem) {
-            $result[] = $castItem;
-        }
-        /** @var \SplObjectStorage $__castResults */
-        $__castResults = $this->castResults[$origItem];
-        $__castResults[$castProcessor] = $result;
-        if ($__castResults->count() === count($this->castProcessors)) {
-            $result = [];
-            foreach ($__castResults as $__castProc) {
-                $result = array_merge($result, $__castResults[$__castProc]);
-            }
-            $this->castResults->detach($origItem);
-            ($this->releaseDataItem)(DataItemImpl::fromArray($result));
-            if (!$this->waitingQueue->isEmpty()) {
-                $suspension = $this->waitingQueue->dequeue();
-                $suspension->resume();
-            }
-        }
-    }
 }
