@@ -39,7 +39,7 @@ class MultiCastProcessor extends ProcessorAbstract
         bool      $groupResults = false,
         int       $groupBufferSize = 0,
         ?\Closure $consumerFactory = null
-    ): self
+    ): static
     {
         return new self(
             $castProcessorFactories,
@@ -84,7 +84,8 @@ class MultiCastProcessor extends ProcessorAbstract
             $castQueue->complete();
         };
 
-        foreach ($iterator as $value) {
+        while ($iterator->continue($this->cancellation)) {
+            $value = $iterator->getValue();
             $this->tapObjectStorage($castQueues, $pushCastQueue, $value);
         }
 

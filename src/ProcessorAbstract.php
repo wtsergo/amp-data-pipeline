@@ -2,6 +2,7 @@
 
 namespace Wtsergo\AmpDataPipeline;
 
+use Amp\Cancellation;
 use Amp\Pipeline\ConcurrentIterator;
 use Amp\Pipeline\Internal\ConcurrentQueueIterator;
 use Amp\Pipeline\Queue;
@@ -28,9 +29,11 @@ abstract class ProcessorAbstract implements Processor
     /**
      * @var ConcurrentQueueIterator<DataItem>|null
      */
-    private ?ConcurrentQueueIterator $iterator;
+    protected ?ConcurrentQueueIterator $iterator;
 
-    public function setSource(DataSource $source): self
+    protected ?Cancellation $cancellation = null;
+
+    public function setSource(DataSource $source): static
     {
         $this->source = $source;
         return $this;
@@ -41,15 +44,21 @@ abstract class ProcessorAbstract implements Processor
         return $this->source ?? throw new \RuntimeException('Undefined processor source');
     }
 
-    public function setConcurrency(int $concurrency): self
+    public function setConcurrency(int $concurrency): static
     {
         $this->concurrency = $concurrency;
         return $this;
     }
 
-    public function setBufferSize(int $bufferSize): self
+    public function setBufferSize(int $bufferSize): static
     {
         $this->bufferSize = $bufferSize;
+        return $this;
+    }
+
+    public function setCancellation(?Cancellation $cancellation): static
+    {
+        $this->cancellation = $cancellation;
         return $this;
     }
 
@@ -59,8 +68,8 @@ abstract class ProcessorAbstract implements Processor
      */
     protected function read(ConcurrentIterator $iterator): void
     {
-        foreach ($iterator as $value) {
-            $this->processDataItem($value);
+        while ($iterator->continue($this->cancellation)) {
+            $this->processDataItem($iterator->getValue());
         }
     }
 
@@ -93,7 +102,7 @@ abstract class ProcessorAbstract implements Processor
         return $this->iterator;
     }
 
-    public function reset(): self
+    public function reset(): static
     {
         $this->assertQueueComplete($this->queue);
         $this->queue = null;

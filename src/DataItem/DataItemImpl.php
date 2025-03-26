@@ -20,7 +20,7 @@ class DataItemImpl implements DataItem
         return $key ? $this->data[$key]??null : $this->data;
     }
 
-    public function setData(array $data): self
+    public function setData(array $data): static
     {
         $this->data = $data;
         return $this;
@@ -31,19 +31,19 @@ class DataItemImpl implements DataItem
         return $key ? $this->meta[$key]??null : $this->meta;
     }
 
-    public function setMeta(array $meta): self
+    public function setMeta(array $meta): static
     {
         $this->meta = $meta;
         return $this;
     }
 
-    public function addMeta(mixed $value, $key): self
+    public function addMeta(mixed $value, $key): static
     {
         $this->meta[$key] = $value;
         return $this;
     }
 
-    public function addData(mixed $value, $key=null): self
+    public function addData(mixed $value, $key=null): static
     {
         if ($key === null) {
             $this->data[] = $value;

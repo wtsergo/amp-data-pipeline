@@ -26,7 +26,7 @@ class ProcessorComposition extends ProcessorAbstract
     /**
      * @param list<Processor> $processors
      */
-    public static function selfCreate(array $processors): self
+    public static function selfCreate(array $processors): static
     {
         return new self($processors);
     }
@@ -40,14 +40,14 @@ class ProcessorComposition extends ProcessorAbstract
         if ($this->lastSource === null) {
             $this->lastSource = $this->getSource();
             foreach ($this->processors as $processor) {
-                $processor->setSource($this->lastSource);
+                $processor->setSource($this->lastSource)->setCancellation($this->cancellation);
                 $this->lastSource = $processor;
             }
         }
         return $this->lastSource->getIterator();
     }
 
-    public function reset(): self
+    public function reset(): static
     {
         foreach ($this->processors as $processor) {
             $processor->reset();

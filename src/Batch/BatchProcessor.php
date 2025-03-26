@@ -43,7 +43,7 @@ class BatchProcessor extends ProcessorAbstract
         bool     $ordered = false,
         bool     $groupResults = false,
         bool     $throwIfUnhadled = true,
-    ): self
+    ): static
     {
         return new self(
             $batchProcessorFactory,
@@ -58,7 +58,7 @@ class BatchProcessor extends ProcessorAbstract
     protected function consumeBatchQueue(Queue $queue, Processor $processor, DataItemHandler $handler)
     {
         $processor->reset();
-        $processor->setSource(new QueueSource($queue));
+        $processor->setSource(new QueueSource($queue))->setCancellation($this->cancellation);
         $futuresQueue = new Queue();
         foreach ($processor as $resultItem) {
             if ($handler->canHandle($resultItem)) {
@@ -90,7 +90,8 @@ class BatchProcessor extends ProcessorAbstract
         $this->assertHandler($handler = ($this->resultHandlerFactory)($this->ordered));
         $batchQueue = new Queue($this->batchSize);
         $batchFuture = async($this->consumeBatchQueue(...), $batchQueue, $processor, $handler);
-        foreach ($iterator as $item) {
+        while ($iterator->continue($this->cancellation)) {
+            $item = $iterator->getValue();
             if ($count >= $this->batchSize) {
                 $batchQueue?->complete();
                 $batchFuture?->await();

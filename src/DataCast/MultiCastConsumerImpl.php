@@ -75,7 +75,7 @@ class MultiCastConsumerImpl implements MultiCastConsumer
         \Closure $releaseDataItem,
         bool $groupResults,
         int $groupBufferSize
-    ): self {
+    ): static {
         return new self(
             $processor,
             $queue,
