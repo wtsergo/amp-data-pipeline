@@ -17,7 +17,7 @@ class DataItemImpl implements DataItem
 
     public function getData($key=null): mixed
     {
-        return $key ? $this->data[$key]??null : $this->data;
+        return $key !== null ? $this->data[$key]??null : $this->data;
     }
 
     public function setData(array $data): static
@@ -26,9 +26,9 @@ class DataItemImpl implements DataItem
         return $this;
     }
 
-    public function getMeta($key = null): mixed
+    public function getMeta(mixed $key = null): mixed
     {
-        return $key ? $this->meta[$key]??null : $this->meta;
+        return $key !== null ? $this->meta[$key]??null : $this->meta;
     }
 
     public function setMeta(array $meta): static
@@ -37,13 +37,13 @@ class DataItemImpl implements DataItem
         return $this;
     }
 
-    public function addMeta(mixed $value, $key): static
+    public function addMeta(mixed $value, mixed $key): static
     {
         $this->meta[$key] = $value;
         return $this;
     }
 
-    public function addData(mixed $value, $key=null): static
+    public function addData(mixed $value, mixed $key = null): static
     {
         if ($key === null) {
             $this->data[] = $value;
