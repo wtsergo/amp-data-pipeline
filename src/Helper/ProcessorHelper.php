@@ -63,7 +63,6 @@ trait ProcessorHelper
                 }
             } catch (\Throwable $throwable) {
                 $queue->error(new DisposedException(previous: $throwable));
-                $source->dispose();
             }
         });
     }
