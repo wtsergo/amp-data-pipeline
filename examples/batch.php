@@ -8,6 +8,7 @@ namespace Wtsergo\AmpDataPipeline {
 
     use Amp\Cancellation;
     use Amp\Future;
+    use Amp\Pipeline\ConcurrentIterator;
     use Amp\Pipeline\Queue;
     use Wtsergo\AmpDataPipeline\Batch\BatchProcessor;
     use Wtsergo\AmpDataPipeline\DataCast\CastProcessor;
@@ -27,16 +28,16 @@ namespace Wtsergo\AmpDataPipeline {
         ) {
         }
 
-        public function cast(DataSource $source, \Closure $acceptCastItem): void
+        public function cast(ConcurrentIterator $source, \Closure $acceptCastItem): void
         {
-            $this->assertSourceIterator($iterator = $source->getIterator());
+            $this->assertSourceIterator($source);
             $result = DataItemImpl::fromArray([]);
             $result->addMeta($this->columns, 'columns');
             /** @var DataItem $item */
             $i=0;
             $queue = new Queue(10);
             $acceptCastItem($queue->iterate());
-            foreach ($iterator as $item) {
+            foreach ($source as $item) {
                 $data = $item->getData();
                 foreach ($this->columns as $column) {
                     $result->addData($data[$column]??null);

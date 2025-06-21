@@ -12,5 +12,5 @@ interface CastProcessor
      * @param \Closure(ConcurrentIterator,?DataItem $origItem,?CastProcessor $castProcessor):void $acceptCastItem
      * @return void
      */
-    public function cast(DataSource $source, \Closure $acceptCastItem): void;
+    public function cast(ConcurrentIterator $source, \Closure $acceptCastItem): void;
 }

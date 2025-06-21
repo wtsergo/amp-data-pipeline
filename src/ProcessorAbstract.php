@@ -93,11 +93,12 @@ abstract class ProcessorAbstract implements Processor
             }
             $this->queue = $queue = new Queue($bufferSize);
             $this->iterator = $this->queue->iterate();
+            $source = $this->getSource()->getIterator();
             $futures = [];
             for ($i=0; $i<$this->concurrency; $i++) {
-                $futures[] = async($this->read(...), $this->getSource()->getIterator());
+                $futures[] = async($this->read(...), $source);
             }
-            $this->trackQueueFutures($queue, $futures);
+            $this->trackQueueFutures($queue, $source, $futures);
         }
         return $this->iterator;
     }

@@ -3,6 +3,7 @@
 namespace Wtsergo\AmpDataPipeline\DataCast;
 
 use Amp\Pipeline\ConcurrentIterator;
+use Amp\Pipeline\DisposedException;
 use Amp\Pipeline\Queue;
 use Revolt\EventLoop;
 use Wtsergo\AmpDataPipeline\DataItem\DataItem;
@@ -91,13 +92,12 @@ class MultiCastConsumerImpl implements MultiCastConsumer
     public function consume(): void
     {
         try {
-            $source = new IteratorSource($this->queue->iterate());
+            $queue = $this->queue;
+            $source = $this->queue->iterate();
             $this->processor->cast($source, $this->acceptCastItem(...));
-        } catch (\Throwable $exception) {
-            // uncomment if getting Amp\Pipeline\DisposedException
-            //die("$exception");
-            errorDisposeQueue($this->queue, $exception);
-            throw $exception;
+        } catch (\Throwable $throwable) {
+            $queue->error(new DisposedException(previous: $throwable));
+            $source->dispose();
         }
     }
 

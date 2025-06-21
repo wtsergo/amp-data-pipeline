@@ -3,6 +3,8 @@
 namespace Wtsergo\AmpDataPipeline\Helper;
 
 use Amp\Future;
+use Amp\Pipeline\ConcurrentIterator;
+use Amp\Pipeline\DisposedException;
 use Amp\Pipeline\Queue;
 use Revolt\EventLoop;
 use function Amp\Future\await;
@@ -49,19 +51,19 @@ trait ProcessorHelper
      * @param Queue $queue
      * @return void
      */
-    protected function trackQueueFutures(Queue $queue, $futures)
+    protected function trackQueueFutures(
+        Queue $queue, ConcurrentIterator $source, $futures
+    ): void
     {
-        EventLoop::queue(static function () use ($futures, $queue): void {
+        EventLoop::queue(static function () use ($futures, $queue, $source): void {
             try {
                 await($futures);
                 if (!$queue->isComplete()) {
                     $queue->complete();
                 }
-            } catch (\Throwable $exception) {
-                // uncomment if getting Amp\Pipeline\DisposedException
-                //die("$exception");
-                $queue->error($exception);
-                throw $exception;
+            } catch (\Throwable $throwable) {
+                $queue->error(new DisposedException(previous: $throwable));
+                $source->dispose();
             }
         });
     }

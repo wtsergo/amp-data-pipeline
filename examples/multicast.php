@@ -6,6 +6,7 @@ namespace {
 
 namespace Wtsergo\AmpDataPipeline {
 
+    use Amp\Pipeline\ConcurrentIterator;
     use Amp\Pipeline\Queue;
     use Revolt\EventLoop;
     use Wtsergo\AmpDataPipeline\DataCast\CastProcessor;
@@ -22,11 +23,11 @@ namespace Wtsergo\AmpDataPipeline {
         ) {
         }
 
-        public function cast(DataSource $source, \Closure $acceptCastItem): void
+        public function cast(ConcurrentIterator $source, \Closure $acceptCastItem): void
         {
-            $this->assertSourceIterator($iterator = $source->getIterator());
+            $this->assertSourceIterator($source);
             /** @var DataItem $item */
-            foreach ($iterator as $item) {
+            foreach ($source as $item) {
                 $queue = new Queue(10);
                 $acceptCastItem($queue->iterate(), $item, $this);
                 $data = $item->getData();
